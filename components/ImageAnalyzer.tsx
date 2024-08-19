@@ -6,7 +6,6 @@ import * as FileSystem from "expo-file-system";
 
 export default function ImageAnalyzer() {
   const [imageUri, setImageUri] = useState("");
-  const [labels, setLabels] = useState([]);
   const [artist, setArtist] = useState("");
   const [title, setTitle] = useState("");
 
@@ -56,9 +55,7 @@ export default function ImageAnalyzer() {
       };
 
       const apiResponse = await axios.post(apiUrl, requestData);
-      // setLabels(
-      //   apiResponse.data.responses[0].webDetection.bestGuessLabels[0].label
-      // );
+
       setArtist(
         apiResponse.data.responses[0].webDetection.webEntities[0].description
       );
@@ -81,7 +78,7 @@ export default function ImageAnalyzer() {
         Select an image from Library and click "Analyze Image"
       </Text>
       {imageUri && (
-        <Image source={{ uri: imageUri }} style={{ width: 300, height: 300 }} />
+        <Image source={{ uri: imageUri }} style={{ width: 200, height: 200 }} />
       )}
       <TouchableOpacity onPress={pickImage} style={styles.button}>
         <Text style={styles.text}>Pick Image</Text>
@@ -89,9 +86,9 @@ export default function ImageAnalyzer() {
       <TouchableOpacity onPress={analyzeImage} style={styles.button}>
         <Text style={styles.text}>Analyze Image</Text>
       </TouchableOpacity>
-      <Text style={styles.label}>
-        {artist || title ? `${artist} ${title}` : "can't find it"}
-      </Text>
+      {(artist || title) && (
+        <Text style={styles.label}>{`${artist} ${title}`}</Text>
+      )}
     </View>
   );
 }
