@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import { Buffer } from "buffer";
-import { Text, View, TouchableOpacity, Image, StyleSheet } from "react-native";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Linking,
+} from "react-native";
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
@@ -9,6 +16,10 @@ export default function ImageAnalyzer() {
   const [imageUri, setImageUri] = useState("");
   const [artist, setArtist] = useState("");
   const [title, setTitle] = useState("");
+  const [albumLink, setAlbumLink] = useState("");
+
+  const clientId = process.env.EXPO_PUBLIC_SPOTIFY_CLIENT_ID;
+  const clientSecret = process.env.EXPO_PUBLIC_SPOTIFY_CLIENT_SECRET;
 
   let token: string;
   // get spotify token
@@ -17,8 +28,8 @@ export default function ImageAnalyzer() {
       "https://accounts.spotify.com/api/token",
       new URLSearchParams({
         grant_type: "client_credentials",
-        client_id: "b9ea31627fce4ea38ea844bde051c161",
-        client_secret: "d6b83b8b3b7e4ad4a94a8268979c55a4",
+        client_id: `${clientId}`,
+        client_secret: `${clientSecret}`,
       })
     )
     .then(function (response) {
@@ -34,9 +45,13 @@ export default function ImageAnalyzer() {
             },
           }
         )
-        .then((res) =>
-          console.log("==== FIND: ", res.data.albums.items[0].external_urls)
-        );
+        .then((res) => {
+          setAlbumLink(res.data.albums.items[0].external_urls.spotify);
+          console.log(
+            "==== FIND: ",
+            res.data.albums.items[0].external_urls.spotify
+          );
+        });
     })
     .catch(function (error) {
       // handle error
@@ -122,6 +137,14 @@ export default function ImageAnalyzer() {
       </TouchableOpacity>
       {(artist || title) && (
         <Text style={styles.label}>{`${artist} ${title}`}</Text>
+      )}
+      {albumLink && (
+        <Text
+          style={{ color: "blue" }}
+          onPress={() => Linking.openURL(`${albumLink}`)}
+        >
+          {albumLink}
+        </Text>
       )}
     </View>
   );
