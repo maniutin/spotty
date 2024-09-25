@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Buffer } from "buffer";
 import { Text, View, TouchableOpacity, Image, StyleSheet } from "react-native";
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
@@ -8,6 +9,39 @@ export default function ImageAnalyzer() {
   const [imageUri, setImageUri] = useState("");
   const [artist, setArtist] = useState("");
   const [title, setTitle] = useState("");
+
+  let token: string;
+  // get spotify token
+  axios
+    .post(
+      "https://accounts.spotify.com/api/token",
+      new URLSearchParams({
+        grant_type: "client_credentials",
+        client_id: "b9ea31627fce4ea38ea844bde051c161",
+        client_secret: "d6b83b8b3b7e4ad4a94a8268979c55a4",
+      })
+    )
+    .then(function (response) {
+      // handle success
+      console.log(response.data);
+      token = response.data.access_token;
+      axios
+        .get(
+          `https://api.spotify.com/v1/search?q=${artist} ${title}&type=album`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((res) =>
+          console.log("==== FIND: ", res.data.albums.items[0].external_urls)
+        );
+    })
+    .catch(function (error) {
+      // handle error
+      console.log(error);
+    });
 
   const pickImage = async () => {
     try {
@@ -96,7 +130,7 @@ export default function ImageAnalyzer() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
   },
   title: {
